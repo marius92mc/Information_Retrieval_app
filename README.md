@@ -16,9 +16,14 @@
 <br />
     <h5> Info: </h5> 
     <ul> 
-        <li> For running the Indexer, we also have to provide the index as "-index index" and the directory with the files to be indexed "-docs documents". </li>
-<br />
-        <li> For running command, the class name has to be like this: package_name_from_java_file.class_name_without_extension </li>
+        <li> For running the Indexer, we also have to provide 
+             the index as "-index index" and the directory with
+              the files to be indexed "-docs documents". 
+        </li>
+        <li> For running command, the class name has to be 
+             like this: package_name_from_java_file.class_name_without_extension 
+        </li>
     </ul>              
+
 <br />
-<br />
+    
