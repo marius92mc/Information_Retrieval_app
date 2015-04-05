@@ -14,6 +14,8 @@
 
 ---
 <br />
+    <h4> Info: </h4> 
+<br />
     For running the Indexer, we also have to provide the index as "-index index" and the directory with the files to be indexed "-docs documents".
 <br />
     For running command, the class name has to be like this: package_name_from_java_file.class_name_without_extension
