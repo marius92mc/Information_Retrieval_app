@@ -1,5 +1,5 @@
 #
-# A simple makefile for compiling three java classes
+# Makefile for compiling IndexFiles.java and SearchFiles.java 
 #
 
 # define a makefile variable for the java compiler
@@ -16,8 +16,8 @@ CLASSPATH = .:../lucene-5.0.0/lib_made/lucene-core-5.0.0.jar:../lucene-5.0.0/lib
 #
 default: IndexFiles.class SearchFiles.class
 
-# this target entry builds the Average class
-# the Average.class file is dependent on the Average.java file
+# this target entry builds the IndexFiles class
+# the IndexFiles.class file is dependent on the IndexFiles.java file
 # and the rule associated with this entry gives the command to create it
 #
 IndexFiles.class: IndexFiles.java
