@@ -1,4 +1,4 @@
-package org.apache.lucene.demo;
+//package org.apache.lucene.demo;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.ro.RomanianAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -36,6 +37,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+
+import org.tartarus.snowball.ext.RomanianStemmer;
 
 /** Simple command-line based search demo. */
 public class SearchFiles 
@@ -113,8 +116,8 @@ public class SearchFiles
     
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
     IndexSearcher searcher = new IndexSearcher(reader);
-    Analyzer analyzer = new StandardAnalyzer();
-
+    RomanianAnalyzer analyzer = new RomanianAnalyzer(); // builds an analyzer
+                                                        // with the default stopwords
     BufferedReader in = null;
     
     if (queries != null) 

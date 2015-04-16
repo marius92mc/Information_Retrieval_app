@@ -1,4 +1,4 @@
-package org.apache.lucene.demo;
+//package org.apache.lucene.demo;
 /*
 004 * Licensed to the Apache Software Foundation (ASF) under one or more
 005 * contributor license agreements.  See the NOTICE file distributed with
@@ -31,6 +31,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import org.tartarus.snowball.ext.RomanianStemmer;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +45,8 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.*;
+
 /** Index all text files under a directory.
   * <p>
   * This is a command-line application demonstrating simple Lucene indexing.
@@ -104,8 +108,25 @@ public class IndexFiles {
       System.out.println("Indexing to directory '" + indexPath + "'...");
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
-      RomanianAnalyzer analyzer = new RomanianAnalyzer();
+
+
+      RomanianAnalyzer analyzer = new RomanianAnalyzer(); // builds an analyzer
+                                                          // with the default stopwords 
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+       
+      /* Print the default stopword set 
+      Set<String> stop_words = new HashSet<String>();
+      Iterator iter = RomanianAnalyzer.getDefaultStopSet().iterator();
+      
+      int i = 0;
+      while (iter.hasNext())
+      {
+          char[] stop_word = (char[]) iter.next();
+          i++;
+          System.out.println(i);
+          System.out.println(stop_word);
+      }
+       */
 
       if (create) 
       {
