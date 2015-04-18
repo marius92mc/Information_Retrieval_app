@@ -1,0 +1,11 @@
+.*
+!/.gitignore
+*~
+
+.idea
+out/production/*
+
+
+.class
+
+
