@@ -53,7 +53,7 @@ public class RomanianAnalyzerWithoutDiacritics extends StopwordAnalyzerBase
         tokenStream = new LowerCaseFilter(tokenStream);
         tokenStream = new StopFilter(tokenStream, getStopwordSet());
         tokenStream = new SnowballFilter(tokenStream, new RomanianStemmer());
-        tokenStream = new ASCIIFoldingFilter(tokenStream);
+        tokenStream = new ASCIIFoldingFilter(tokenStream); // replacing diacritics
 
         return new TokenStreamComponents(source, tokenStream);
     }

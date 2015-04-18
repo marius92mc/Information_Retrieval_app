@@ -14,12 +14,19 @@ CLASSPATH = .:../lucene-5.0.0/lib_made/lucene-core-5.0.0.jar:../lucene-5.0.0/lib
 # typing 'make' will invoke the first target entry in the makefile 
 # (the default one in this case)
 #
-default: IndexFiles.class SearchFiles.class
+default: RomanianAnalyzerWithoutDiacritics.class    \
+         IndexFiles.class                           \
+         SearchFiles.class              
 
 # this target entry builds the IndexFiles class
 # the IndexFiles.class file is dependent on the IndexFiles.java file
 # and the rule associated with this entry gives the command to create it
 #
+RomanianAnalyzerWithoutDiacritics.class: RomanianAnalyzerWithoutDiacritics.java
+	$(JCC) -classpath $(CLASSPATH) $<
+
+	@echo ""
+
 IndexFiles.class: IndexFiles.java
 	$(JCC) -classpath $(CLASSPATH) $<
 	
