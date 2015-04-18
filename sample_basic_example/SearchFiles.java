@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.io.StringReader;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.ro.RomanianAnalyzer;
@@ -37,8 +37,14 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
+
+import org.apache.lucene.analysis.*;
+import org.apache.lucene.analysis.standard.*;
 
 import org.tartarus.snowball.ext.RomanianStemmer;
+
 
 /** Simple command-line based search demo. */
 public class SearchFiles 
@@ -116,7 +122,8 @@ public class SearchFiles
     
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
     IndexSearcher searcher = new IndexSearcher(reader);
-    RomanianAnalyzer analyzer = new RomanianAnalyzer(); // builds an analyzer
+    RomanianAnalyzerWithoutDiacritics analyzer = new RomanianAnalyzerWithoutDiacritics();
+                                                        // builds an analyzer
                                                         // with the default stopwords
     BufferedReader in = null;
     
@@ -144,12 +151,15 @@ public class SearchFiles
       {
         break;
       }
-
+      
       line = line.trim();
       if (line.length() == 0) 
       {
         break;
       }
+      
+      line = replaceDiacritics(line);
+      System.out.println("\n--" + line + "--\n");
       
       Query query = parser.parse(line);
       System.out.println("Searching for: " + query.toString(field));
@@ -173,6 +183,32 @@ public class SearchFiles
       }
     }
     reader.close();
+  }
+
+  public static String replaceDiacritics(String textFile) throws IOException
+  {
+		
+	TokenStream tokenStream = new StandardTokenizer();
+		
+	((Tokenizer) tokenStream).setReader(new StringReader(textFile.trim()));
+		tokenStream = new ASCIIFoldingFilter(tokenStream);
+		
+	CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+	tokenStream.reset();
+	    
+	StringBuilder sb = new StringBuilder();
+	    
+	while (tokenStream.incrementToken()) 
+    {
+	    char[] term = charTermAttribute.toString().toCharArray();
+	            
+	    ((ASCIIFoldingFilter) tokenStream).foldToASCII(term,term.length);
+	    sb.append(term);
+	    sb.append(" ");
+	        
+	} /* while */
+	    
+	 return sb.toString();
   }
 
   /**

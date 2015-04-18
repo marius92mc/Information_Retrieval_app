@@ -15,10 +15,14 @@
 016 * See the License for the specific language governing permissions and
 017 * limitations under the License.
 018 */
-
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.ro.RomanianAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
@@ -33,10 +37,7 @@ import org.apache.lucene.store.FSDirectory;
 
 import org.tartarus.snowball.ext.RomanianStemmer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -110,10 +111,12 @@ public class IndexFiles {
       Directory dir = FSDirectory.open(Paths.get(indexPath));
 
 
-      RomanianAnalyzer analyzer = new RomanianAnalyzer(); // builds an analyzer
+      RomanianAnalyzerWithoutDiacritics analyzer = new RomanianAnalyzerWithoutDiacritics();
+                                                          // builds an analyzer
                                                           // with the default stopwords 
+
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-       
+
       /* Print the default stopword set 
       Set<String> stop_words = new HashSet<String>();
       Iterator iter = RomanianAnalyzer.getDefaultStopSet().iterator();
@@ -172,7 +175,34 @@ public class IndexFiles {
     }
   }
 
-  /**
+    public static String replaceDiacritics(String textFile) throws IOException
+    {
+
+        TokenStream tokenStream = new StandardTokenizer();
+
+        ((Tokenizer) tokenStream).setReader(new StringReader(textFile.trim()));
+        tokenStream = new ASCIIFoldingFilter(tokenStream);
+
+        CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+        tokenStream.reset();
+
+        StringBuilder sb = new StringBuilder();
+
+        while (tokenStream.incrementToken())
+        {
+            char[] term = charTermAttribute.toString().toCharArray();
+
+            ((ASCIIFoldingFilter) tokenStream).foldToASCII(term,term.length);
+            sb.append(term);
+            sb.append(" ");
+
+        } /* while */
+
+        return sb.toString();
+    }
+
+
+    /**
    * Indexes the given file using the given writer, or if a directory is given,
    * recurses over files and directories found under the given directory.
    * 

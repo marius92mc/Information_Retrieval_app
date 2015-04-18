@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="lucene-test-framework-5.0.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/test-framework/lucene-test-framework-5.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

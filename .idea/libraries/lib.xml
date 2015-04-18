@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-http-8.1.10.v20130312.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/httpcore-4.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-util-8.1.10.v20130312.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-io-8.1.10.v20130312.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/httpclient-4.3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/javax.servlet-3.0.0.v201112011016.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-continuation-8.1.10.v20130312.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/commons-logging-1.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-servlet-8.1.10.v20130312.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/replicator/lib/jetty-server-8.1.10.v20130312.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

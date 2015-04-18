@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="lib4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/test-framework/lib/junit-4.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/test-framework/lib/randomizedtesting-runner-2.1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/test-framework/lib/ant-1.8.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lucene-5.0.0/test-framework/lib/junit4-ant-2.1.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
