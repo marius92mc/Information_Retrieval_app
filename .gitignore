@@ -1,6 +1,7 @@
 .*
 *~
 *.xml
+*.iml
 
 .idea
 out/production/*
