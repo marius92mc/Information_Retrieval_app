@@ -21,6 +21,7 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.snowball.SnowballFilter;
 
 import org.tartarus.snowball.ext.RomanianStemmer;
 
@@ -51,6 +52,7 @@ public class RomanianAnalyzerWithoutDiacritics extends StopwordAnalyzerBase
         tokenStream = new StandardFilter(tokenStream);
         tokenStream = new LowerCaseFilter(tokenStream);
         tokenStream = new StopFilter(tokenStream, getStopwordSet());
+        tokenStream = new SnowballFilter(tokenStream, new RomanianStemmer());
         tokenStream = new ASCIIFoldingFilter(tokenStream);
 
         return new TokenStreamComponents(source, tokenStream);

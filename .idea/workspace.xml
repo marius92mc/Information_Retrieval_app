@@ -2,12 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8ecffad8-35d1-4ff7-a315-5b602b56adca" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_a.cfe" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_a.cfs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_a.si" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/segments_b" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample_basic_example/IndexFiles.java" afterPath="$PROJECT_DIR$/sample_basic_example/IndexFiles.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample_basic_example/SearchFiles.java" afterPath="$PROJECT_DIR$/sample_basic_example/SearchFiles.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/index/_g.cfe" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/index/_g.cfs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/index/_g.si" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/index/segments_h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_h.cfe" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_h.cfs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/_h.si" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sample_basic_example/index/segments_i" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/RomanianAnalyzerWithoutDiacritics.class" afterPath="$PROJECT_DIR$/out/production/Information_Retrieval_app/RomanianAnalyzerWithoutDiacritics.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.class" afterPath="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Information_Retrieval_app/SearchFiles.class" afterPath="$PROJECT_DIR$/out/production/Information_Retrieval_app/SearchFiles.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java" afterPath="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample_basic_example/documents/file1.txt" afterPath="$PROJECT_DIR$/sample_basic_example/documents/file1.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Information_Retrieval_app.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -33,8 +41,8 @@
       <file leaf-file-name="IndexFiles.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/sample_basic_example/IndexFiles.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5390625">
-              <caret line="125" column="7" selection-start-line="125" selection-start-column="7" selection-end-line="125" selection-end-column="7" />
+            <state vertical-scroll-proportion="0.28125">
+              <caret line="114" column="8" selection-start-line="114" selection-start-column="8" selection-end-line="114" selection-end-column="8" />
               <folding>
                 <element signature="e#0#10828#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -59,11 +67,11 @@
         <entry file="file://$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="45" column="70" selection-start-line="45" selection-start-column="70" selection-end-line="45" selection-end-column="70" />
+              <caret line="54" column="58" selection-start-line="54" selection-start-column="58" selection-end-line="54" selection-end-column="58" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1670#1671#0" expanded="true" />
                 <element signature="e#1729#1730#0" expanded="true" />
+                <element signature="e#1788#1789#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -83,9 +91,9 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerNoDiacritics.java" />
-        <option value="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java" />
-        <option value="$PROJECT_DIR$/sample_basic_example/IndexFiles.java" />
         <option value="$PROJECT_DIR$/sample_basic_example/SearchFiles.java" />
+        <option value="$PROJECT_DIR$/sample_basic_example/IndexFiles.java" />
+        <option value="$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java" />
       </list>
     </option>
   </component>
@@ -473,12 +481,12 @@
       <created>1429368477422</created>
       <option name="number" value="Default" />
       <updated>1429368477422</updated>
-      <workItem from="1429368481574" duration="4793000" />
+      <workItem from="1429368481574" duration="5374000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4793000" />
+    <option name="totallyTimeSpent" value="5374000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="14" y="43" width="1256" height="737" extended-state="0" />
@@ -489,6 +497,7 @@
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -501,12 +510,11 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20382166" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997006" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
     </layout>
   </component>
@@ -524,18 +532,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="45" column="70" selection-start-line="45" selection-start-column="70" selection-end-line="45" selection-end-column="70" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1670#1671#0" expanded="true" />
-            <element signature="e#1729#1730#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sample_basic_example/SearchFiles.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -546,10 +542,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/sample_basic_example/RomanianAnalyzerWithoutDiacritics.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="54" column="58" selection-start-line="54" selection-start-column="58" selection-end-line="54" selection-end-column="58" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1729#1730#0" expanded="true" />
+            <element signature="e#1788#1789#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/sample_basic_example/IndexFiles.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5390625">
-          <caret line="125" column="7" selection-start-line="125" selection-start-column="7" selection-end-line="125" selection-end-column="7" />
+        <state vertical-scroll-proportion="0.28125">
+          <caret line="114" column="8" selection-start-line="114" selection-start-column="8" selection-end-line="114" selection-end-column="8" />
           <folding>
             <element signature="e#0#10828#0" expanded="true" />
             <element signature="imports" expanded="true" />
