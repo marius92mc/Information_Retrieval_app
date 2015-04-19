@@ -15,38 +15,32 @@
 016 * See the License for the specific language governing permissions and
 017 * limitations under the License.
 018 */
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.ro.RomanianAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-
-import org.tartarus.snowball.ext.RomanianStemmer;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
-import java.util.*;
 
 /** Index all text files under a directory.
   * <p>
@@ -54,7 +48,9 @@ import java.util.*;
   * Run it with no command-line arguments for usage information.
  */
 public class IndexFiles {
-  
+
+    private static String fileContent;
+
   private IndexFiles() {}
 
   /** Index all text files under a directory. */
@@ -201,6 +197,28 @@ public class IndexFiles {
         return sb.toString();
     }
 
+    public static String documentType(String file)
+    {
+        String fileType = "Undetermined";
+        try
+        {
+            final URL url = new URL("file://" + file);
+            final URLConnection connection = url.openConnection();
+            fileType = connection.getContentType();
+        }
+        catch (MalformedURLException badUrlEx)
+        {
+            System.out.println("ERROR: Bad URL - " + badUrlEx);
+        }
+
+        catch (IOException ioEx)
+        {
+            System.out.println("Cannot access URLConnection - " + ioEx);
+        }
+
+        return fileType;
+    }
+
 
     /**
    * Indexes the given file using the given writer, or if a directory is given,
@@ -245,55 +263,143 @@ public class IndexFiles {
   }
 
   /** Indexes a single document */
-  static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException 
+  static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException
   {
-    try (InputStream stream = Files.newInputStream(file)) 
-    {
-      // make a new, empty document
-      Document doc = new Document();
-      
-      // Add the path of the file as a field named "path".  Use a
-      // field that is indexed (i.e. searchable), but don't tokenize 
-      // the field into separate words and don't index term frequency
-      // or positional information:
-      Field pathField = new StringField("path", file.toString(), Field.Store.YES);
-      doc.add(pathField);
-      
-      // Add the last modified date of the file a field named "modified".
-      // Use a LongField that is indexed (i.e. efficiently filterable with
-      // NumericRangeFilter).  This indexes to milli-second resolution, which
-      // is often too fine.  You could instead create a number based on
-      // year/month/day/hour/minutes/seconds, down the resolution you require.
-      // For example the long value 2011021714 would mean
-      // February 17, 2011, 2-3 PM.
-      doc.add(new LongField("modified", lastModified, Field.Store.NO));
-      
-      // Add the contents of the file to a field named "contents".  Specify a Reader,
-      // so that the text of the file is tokenized and indexed, but not stored.
-      // Note that FileReader expects the file to be in UTF-8 encoding.
-      // If that's not the case searching for special characters will fail.
-      doc.add(new TextField("contents", 
-                            new BufferedReader(new InputStreamReader(stream, 
-                                                                     StandardCharsets.UTF_8)
-                                              )
-                            )
-              );
-      
-      if (writer.getConfig().getOpenMode() == OpenMode.CREATE) 
+      try (InputStream stream = Files.newInputStream(file))
       {
-        // New index, so we just add the document (no old document can be there):
-        System.out.println("adding " + file);
-        writer.addDocument(doc);
-      } 
-      else 
-      {
-        // Existing index (an old copy of this document may have been indexed) so 
-        // we use updateDocument instead to replace the old one matching the exact 
-        // path, if present:
-        System.out.println("updating " + file);
-        writer.updateDocument(new Term("path", file.toString()), doc);
+          //System.out.println("-- " + documentType(file.toString()));
+
+          String fileType = documentType(file.toString()); // application/pdf, text/plain
+          String plainFile = "plain";
+          String pdfFile = "pdf";
+
+
+          if (fileType.toLowerCase().contains(plainFile.toLowerCase()))
+          {
+              indexPlaintext(file, writer, stream, lastModified);
+          }
+          else
+          {
+              if (fileType.toLowerCase().contains(pdfFile.toLowerCase()))
+              {
+                  indexPdfs(file, writer, stream);
+              }
+          }
       }
-    }
   }
+
+    public static void indexPlaintext(Path file, IndexWriter writer, InputStream stream, long lastModified)
+        throws FileNotFoundException, CorruptIndexException, IOException
+    {
+        // make a new, empty document
+        Document doc = new Document();
+
+        // Add the path of the file as a field named "path".  Use a
+        // field that is indexed (i.e. searchable), but don't tokenize
+        // the field into separate words and don't index term frequency
+        // or positional information:
+        Field pathField = new StringField("path", file.toString(), Field.Store.YES);
+
+        doc.add(pathField);
+
+        // Add the last modified date of the file a field named "modified".
+        // Use a LongField that is indexed (i.e. efficiently filterable with
+        // NumericRangeFilter).  This indexes to milli-second resolution, which
+        // is often too fine.  You could instead create a number based on
+        // year/month/day/hour/minutes/seconds, down the resolution you require.
+        // For example the long value 2011021714 would mean
+        // February 17, 2011, 2-3 PM.
+        doc.add(new LongField("modified", lastModified, Field.Store.NO));
+
+        // Add the contents of the file to a field named "contents".  Specify a Reader,
+        // so that the text of the file is tokenized and indexed, but not stored.
+        // Note that FileReader expects the file to be in UTF-8 encoding.
+        // If that's not the case searching for special characters will fail.
+        doc.add(new TextField("contents",
+                        new BufferedReader(new InputStreamReader(stream,
+                                StandardCharsets.UTF_8)
+                        )
+                )
+        );
+
+        if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
+            // New index, so we just add the document (no old document can be there):
+            System.out.println("adding " + file);
+            writer.addDocument(doc);
+        } else {
+            // Existing index (an old copy of this document may have been indexed) so
+            // we use updateDocument instead to replace the old one matching the exact
+            // path, if present:
+            System.out.println("updating " + file);
+            writer.updateDocument(new Term("path", file.toString()), doc);
+        }
+    }
+
+
+    /**
+     * This method is for indexing pdf file and doc file.
+     * The text parsed from them are indexed along with the filename and filepath
+     * @param file : the file which you want to index
+     * @throws FileNotFoundException
+     * @throws CorruptIndexException
+     * @throws IOException
+     */
+    public static void indexPdfs(Path file, IndexWriter writer, InputStream stream)
+            throws FileNotFoundException, CorruptIndexException, IOException
+    {
+        fileContent = null;
+        PDFParser pdfparser = null;
+        try
+        {
+            Document doc = new Document();
+            /*
+            if (file.getName().endsWith(".doc")) {
+
+                //call the doc file parser and get the content of doc file in txt format
+                //fileContent = new DocFileParser().DocFileContentParser(file.getAbsolutePath());
+            }
+            if (file.getName().endsWith(".pdf")) {
+                //call the pdf file parser and get the content of pdf file in txt format
+                pdfparser = new PDFParser(stream);
+            }*/
+            pdfparser = new PDFParser(stream);
+            pdfparser.parse();
+            COSDocument cosDoc = pdfparser.getDocument();
+
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            PDDocument pdDoc = new PDDocument(cosDoc);
+
+            pdfStripper.setStartPage(1);
+            pdfStripper.setEndPage(pdDoc.getNumberOfPages());
+
+            fileContent = pdfStripper.getText(pdDoc);
+
+            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
+
+            doc.add(pathField);
+            doc.add(new TextField("contents", fileContent, Field.Store.YES));
+            doc.add(new TextField("filename", file.toString(), Field.Store.YES));
+
+            if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
+            {
+                // New index, so we just add the document (no old document can be there):
+                System.out.println("adding " + file);
+                writer.addDocument(doc);
+            }
+            else
+            {
+                // Existing index (an old copy of this document may have been indexed) so
+                // we use updateDocument instead to replace the old one matching the exact
+                // path, if present:
+                System.out.println("updating " + file);
+                writer.updateDocument(new Term("path", file.toString()), doc);
+            }
+
+        } /* try */
+        catch (Exception e)
+        {
+            System.out.println("error in indexing" + (file.toString()));
+        }
+    }
 }
 

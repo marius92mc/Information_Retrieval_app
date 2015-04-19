@@ -16,18 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.io.StringReader;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.ro.RomanianAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -37,13 +30,15 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 
-import org.apache.lucene.analysis.*;
-import org.apache.lucene.analysis.standard.*;
-
-import org.tartarus.snowball.ext.RomanianStemmer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
 
 
 /** Simple command-line based search demo. */
@@ -160,7 +155,7 @@ public class SearchFiles
       
       line = replaceDiacritics(line);
       System.out.println("\n--" + line + "--\n");
-      
+
       Query query = parser.parse(line);
       System.out.println("Searching for: " + query.toString(field));
             
