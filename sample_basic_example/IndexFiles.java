@@ -272,23 +272,31 @@ public class IndexFiles {
           String fileType = documentType(file.toString()); // application/pdf, text/plain
           String plainFile = "plain";
           String pdfFile = "pdf";
+          String docFile = "doc";
 
 
           if (fileType.toLowerCase().contains(plainFile.toLowerCase()))
           {
-              indexPlaintext(file, writer, stream, lastModified);
+              indexPlaintextFiles(file, writer, stream, lastModified);
           }
           else
           {
               if (fileType.toLowerCase().contains(pdfFile.toLowerCase()))
               {
-                  indexPdfs(file, writer, stream);
+                  indexPdfFiles(file, writer, stream, lastModified);
+              }
+              else
+              {
+                  if (fileType.toLowerCase().contains(docFile.toLowerCase()))
+                  {
+                      //indexDocFiles(file, writer, stream, lastModified);
+                  }
               }
           }
       }
   }
 
-    public static void indexPlaintext(Path file, IndexWriter writer, InputStream stream, long lastModified)
+    public static void indexPlaintextFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
         throws FileNotFoundException, CorruptIndexException, IOException
     {
         // make a new, empty document
@@ -336,7 +344,7 @@ public class IndexFiles {
     }
 
 
-    public static void indexPdfs(Path file, IndexWriter writer, InputStream stream)
+    public static void indexPdfFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
             throws FileNotFoundException, CorruptIndexException, IOException
     {
         fileContent = null;
@@ -369,6 +377,15 @@ public class IndexFiles {
             Field pathField = new StringField("path", file.toString(), Field.Store.YES);
 
             doc.add(pathField);
+            // Add the last modified date of the file a field named "modified".
+            // Use a LongField that is indexed (i.e. efficiently filterable with
+            // NumericRangeFilter).  This indexes to milli-second resolution, which
+            // is often too fine.  You could instead create a number based on
+            // year/month/day/hour/minutes/seconds, down the resolution you require.
+            // For example the long value 2011021714 would mean
+            // February 17, 2011, 2-3 PM.
+            doc.add(new LongField("modified", lastModified, Field.Store.NO));
+
             doc.add(new TextField("contents", fileContent, Field.Store.YES));
             doc.add(new TextField("filename", file.toString(), Field.Store.YES));
 
