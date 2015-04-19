@@ -336,14 +336,6 @@ public class IndexFiles {
     }
 
 
-    /**
-     * This method is for indexing pdf file and doc file.
-     * The text parsed from them are indexed along with the filename and filepath
-     * @param file : the file which you want to index
-     * @throws FileNotFoundException
-     * @throws CorruptIndexException
-     * @throws IOException
-     */
     public static void indexPdfs(Path file, IndexWriter writer, InputStream stream)
             throws FileNotFoundException, CorruptIndexException, IOException
     {
