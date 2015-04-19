@@ -33,6 +33,9 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 
+import org.apache.poi.hwpf.HWPFDocument;
+
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -275,21 +278,21 @@ public class IndexFiles {
           String docFile = "doc";
 
 
-          if (fileType.toLowerCase().contains(plainFile.toLowerCase()))
+          if (fileType.toLowerCase().contains(plainFile.toLowerCase())) // plain text
           {
               indexPlaintextFiles(file, writer, stream, lastModified);
           }
           else
           {
-              if (fileType.toLowerCase().contains(pdfFile.toLowerCase()))
+              if (fileType.toLowerCase().contains(pdfFile.toLowerCase())) // pdf
               {
                   indexPdfFiles(file, writer, stream, lastModified);
               }
               else
               {
-                  if (fileType.toLowerCase().contains(docFile.toLowerCase()))
+                  if (file.toString().endsWith("doc"))  // doc
                   {
-                      //indexDocFiles(file, writer, stream, lastModified);
+                      indexDocFiles(file, writer, stream, lastModified);
                   }
               }
           }
@@ -373,6 +376,58 @@ public class IndexFiles {
             pdfStripper.setEndPage(pdDoc.getNumberOfPages());
 
             fileContent = pdfStripper.getText(pdDoc);
+
+            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
+
+            doc.add(pathField);
+            // Add the last modified date of the file a field named "modified".
+            // Use a LongField that is indexed (i.e. efficiently filterable with
+            // NumericRangeFilter).  This indexes to milli-second resolution, which
+            // is often too fine.  You could instead create a number based on
+            // year/month/day/hour/minutes/seconds, down the resolution you require.
+            // For example the long value 2011021714 would mean
+            // February 17, 2011, 2-3 PM.
+            doc.add(new LongField("modified", lastModified, Field.Store.NO));
+
+            doc.add(new TextField("contents", fileContent, Field.Store.YES));
+            doc.add(new TextField("filename", file.toString(), Field.Store.YES));
+
+            if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
+            {
+                // New index, so we just add the document (no old document can be there):
+                System.out.println("adding " + file);
+                writer.addDocument(doc);
+            }
+            else
+            {
+                // Existing index (an old copy of this document may have been indexed) so
+                // we use updateDocument instead to replace the old one matching the exact
+                // path, if present:
+                System.out.println("updating " + file);
+                writer.updateDocument(new Term("path", file.toString()), doc);
+            }
+
+        } /* try */
+        catch (Exception e)
+        {
+            System.out.println("error in indexing" + (file.toString()));
+        }
+    }
+
+    public static void indexDocFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
+            throws FileNotFoundException, CorruptIndexException, IOException
+    {
+        fileContent = null;
+
+        try
+        {
+
+            Document doc = new Document();
+            HWPFDocument docFile = new HWPFDocument(stream);
+
+            StringBuilder documentContent = docFile.getText();
+            //System.out.println(documentContent.toString());
+            fileContent = documentContent.toString();
 
             Field pathField = new StringField("path", file.toString(), Field.Store.YES);
 
