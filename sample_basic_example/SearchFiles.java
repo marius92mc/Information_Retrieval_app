@@ -154,11 +154,12 @@ public class SearchFiles
       }
       
       line = replaceDiacritics(line);
-      System.out.println("\n--" + line + "--\n");
+      //System.out.println("\n--" + line + "--\n");                     --------------------------------------
 
       Query query = parser.parse(line);
-      System.out.println("Searching for: " + query.toString(field));
-            
+      //System.out.println("Searching for: " + query.toString(field));  --------------------------------------
+      System.out.println();
+
       if (repeat > 0) 
       {                           // repeat & time as benchmark
         Date start = new Date();

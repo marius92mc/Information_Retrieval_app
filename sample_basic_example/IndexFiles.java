@@ -32,10 +32,9 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
-
 import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;         // TODO   add ../lucene-5.0.0/lib_made/poi-ooxml-3.11.jar 
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;    //            in IntelliJ IDEA
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -109,6 +108,10 @@ public class IndexFiles {
       System.out.println("Indexing to directory '" + indexPath + "'...");
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
+
+      //-----
+      //-----
+
 
 
       RomanianAnalyzerWithoutDiacritics analyzer = new RomanianAnalyzerWithoutDiacritics();
@@ -295,7 +298,7 @@ public class IndexFiles {
                   {
                       indexDocFiles(file, writer, stream, lastModified);
                   }
-                  else 
+                  else
                   {
                       if (file.toString().endsWith("docx")) // docx
                       {

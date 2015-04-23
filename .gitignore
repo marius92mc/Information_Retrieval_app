@@ -3,6 +3,8 @@
 *.xml
 *.iml
 
+cerinte
+
 .idea
 out/production/*
 sample_basic_example/index/*
