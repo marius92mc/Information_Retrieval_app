@@ -44,15 +44,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 /** Index all text files under a directory.
   * <p>
   * This is a command-line application demonstrating simple Lucene indexing.
   * Run it with no command-line arguments for usage information.
  */
-public class IndexFiles {
-
-    private static String fileContent;
+public class IndexFiles
+{
+  private static String fileContent;
+  private static boolean docsWithDescription = false;
+  private static int nrOfWordsInDescription = 10;
 
   private IndexFiles() {}
 
@@ -85,6 +88,11 @@ public class IndexFiles {
               {
                 create = false;
               }
+              else
+                  if ("-description".equals(args[i]))
+                  {
+                      docsWithDescription = true;
+                  }
     } /* for */
 
     if (docsPath == null) 
@@ -338,11 +346,19 @@ public class IndexFiles {
         // Note that FileReader expects the file to be in UTF-8 encoding.
         // If that's not the case searching for special characters will fail.
         doc.add(new TextField("contents",
-                        new BufferedReader(new InputStreamReader(stream,
-                                StandardCharsets.UTF_8)
-                        )
-                )
-        );
+                              new BufferedReader(new InputStreamReader(stream,
+                                                                       StandardCharsets.UTF_8))));
+        doc.add(new TextField("filename", file.toString(), Field.Store.YES));
+
+        if (docsWithDescription)
+        {
+            String description = getDescriptionFromFile(fileContent);
+            TextField descriptionField = new TextField("description",
+                                                     description,
+                                                     Field.Store.NO);
+            descriptionField.setBoost(3);
+            doc.add(descriptionField);
+        } /* if (docsWithDescription) */
 
         if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
             // New index, so we just add the document (no old document can be there):
@@ -400,8 +416,18 @@ public class IndexFiles {
             // February 17, 2011, 2-3 PM.
             doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
-            doc.add(new TextField("contents", fileContent, Field.Store.YES));
+            doc.add(new TextField("contents", fileContent, Field.Store.YES)); // http://oak.cs.ucla.edu/cs144/projects/lucene/ maybe it should ne Field.Store.NO
             doc.add(new TextField("filename", file.toString(), Field.Store.YES));
+
+            if (docsWithDescription)
+            {
+                String description = getDescriptionFromFile(fileContent);
+                TextField descriptionField = new TextField("description",
+                                                         description,
+                                                         Field.Store.NO);
+                descriptionField.setBoost(3);
+                doc.add(descriptionField);
+            } /* if (docsWithDescription) */
 
             if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
             {
@@ -455,6 +481,16 @@ public class IndexFiles {
             doc.add(new TextField("contents", fileContent, Field.Store.YES));
             doc.add(new TextField("filename", file.toString(), Field.Store.YES));
 
+            if (docsWithDescription)
+            {
+                String description = getDescriptionFromFile(fileContent);
+                TextField descriptionField = new TextField("description",
+                                                         description,
+                                                         Field.Store.NO);
+                descriptionField.setBoost(3);
+                doc.add(descriptionField);
+            } /* if (docsWithDescription) */
+
             if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
             {
                 // New index, so we just add the document (no old document can be there):
@@ -507,6 +543,16 @@ public class IndexFiles {
             doc.add(new TextField("contents", fileContent, Field.Store.YES));
             doc.add(new TextField("filename", file.toString(), Field.Store.YES));
 
+            if (docsWithDescription)
+            {
+                String description = getDescriptionFromFile(fileContent);
+                TextField descriptionField = new TextField("description",
+                                                         description,
+                                                         Field.Store.NO);
+                descriptionField.setBoost(3);
+                doc.add(descriptionField);
+            } /* if (docsWithDescription) */
+
             if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
             {
                 // New index, so we just add the document (no old document can be there):
@@ -527,6 +573,20 @@ public class IndexFiles {
         {
             System.out.println("error in indexing" + (file.toString()));
         }
+    }
+
+    public static String getDescriptionFromFile(String fileContent)
+    {
+        StringTokenizer st = new StringTokenizer(fileContent);
+        StringBuilder description = new StringBuilder();
+
+        for (int i = 0; i < nrOfWordsInDescription && st.hasMoreTokens(); i++)
+        {
+            description.append(st.nextToken().toString());
+            description.append(" ");
+        }
+
+        return description.toString();
     }
 }
 

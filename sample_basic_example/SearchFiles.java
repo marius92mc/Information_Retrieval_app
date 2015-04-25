@@ -30,6 +30,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.search.BooleanClause;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,6 +46,7 @@ import java.util.Date;
 /** Simple command-line based search demo. */
 public class SearchFiles 
 {
+  private static boolean docsWithDescription = false;
 
   private SearchFiles() {}
 
@@ -113,6 +116,11 @@ public class SearchFiles
                                 }
                                 i++;
                             }
+                            else
+                                if ("-description".equals(args[i]))
+                                {
+                                    docsWithDescription = true;
+                                }
     } /* for */
     
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
@@ -156,7 +164,18 @@ public class SearchFiles
       line = replaceDiacritics(line);
       //System.out.println("\n--" + line + "--\n");                     --------------------------------------
 
-      Query query = parser.parse(line);
+      Query query = null;
+      if (docsWithDescription)
+      {
+          String[] fields = {"description", "contents"};
+          BooleanClause.Occur[] flags = {BooleanClause.Occur.SHOULD,
+                                         BooleanClause.Occur.MUST};
+          query = MultiFieldQueryParser.parse(line, fields, flags, analyzer);
+      }
+      else
+      {
+          query = parser.parse(line);
+      }
       //System.out.println("Searching for: " + query.toString(field));  --------------------------------------
       System.out.println();
 
@@ -165,11 +184,11 @@ public class SearchFiles
         Date start = new Date();
         for (int i = 0; i < repeat; i++) 
         {
-          searcher.search(query, null, 100);
-        }
+            searcher.search(query, null, 100);
+        } /* for */
         Date end = new Date();
-        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-      }
+        System.out.println("Time: " + (end.getTime() - start.getTime()) + "ms");
+      } /* if (repeat > 0) */
 
       doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
 
@@ -177,7 +196,7 @@ public class SearchFiles
       {
         break;
       }
-    }
+    } /* while */
     reader.close();
   }
 
@@ -252,29 +271,32 @@ public class SearchFiles
       
       for (int i = start; i < end; i++) 
       {
-        if (raw) 
-        {                              // output raw format
-          System.out.println("doc="+hits[i].doc+" score="+hits[i].score);
-          continue;
-        }
-
         Document doc = searcher.doc(hits[i].doc);
         String path = doc.get("path");
         if (path != null) 
         {
-          System.out.println((i+1) + ". " + path);
+          System.out.print((i+1) + ". " + path);
           String title = doc.get("title");
           if (title != null) 
           {
             System.out.println("   Title: " + doc.get("title"));
+          }
+          if (raw)
+          {                              // output raw format
+              System.out.print(" doc = " + hits[i].doc +
+                               " score = " + hits[i].score + "\n");
+              //continue;
+          } /* if (raw) */
+          else
+          {
+              System.out.println("");
           }
         } 
         else 
         {
           System.out.println((i+1) + ". " + "No path for this document");
         }
-                  
-      }
+      } /* for */
 
       if (!interactive || end == 0) 
       {

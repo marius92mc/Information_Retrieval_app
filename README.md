@@ -30,6 +30,18 @@
     $ java -classpath .:../lucene-5.0.0/lib_made/lucene-core-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-analyzers-common-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-queryparser-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-demo-5.0.0.jar:../lucene-5.0.0/lib_made/pdfbox-1.8.9.jar:../lucene-5.0.0/lib_made/fontbox-1.8.9.jar:../lucene-5.0.0/lib_made/poi-scratchpad-3.11.jar:../lucene-5.0.0/lib_made/poi-3.11.jar:../lucene-5.0.0/lib_made/poi-ooxml-3.11.jar:../lucene-5.0.0/lib_made/xmlbeans-2.4.0.jar:../lucene-5.0.0/lib_made/ooxml-schemas-1.0.jar:../lucene-5.0.0/lib_made/commons-logging-1.2.jar:../lucene-5.0.0/lib_made/commons-lang3-3.1.jar:../lucene-5.0.0/lib_made/commons-lang3-3.4.jar IndexFiles -index index -docs documents
     $ java -cp .:../lucene-5.0.0/lib_made/lucene-core-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-analyzers-common-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-queryparser-5.0.0.jar:../lucene-5.0.0/lib_made/lucene-demo-5.0.0.jar:../lucene-5.0.0/lib_made/commons-lang3-3.1.jar:../lucene-5.0.0/lib_made/commons-lang3-3.4.jar SearchFiles
 
+<br />
+    <p>
+        <ul> In case you have to run the java classes on documents 
+        with description, then add these to the run commands above:
+            <li> at indexing: replace "-docs documents" with 
+                "-docs documents_with_description -description" 
+            </li>
+            <li> at searching: "-raw -description" 
+            </li>
+         </ul>
+    </p>
+
 ---
 <br />
     <h5> Info: </h5> 
