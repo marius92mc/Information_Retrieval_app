@@ -417,7 +417,7 @@ public class IndexFiles {
                 System.out.println("updating " + file);
                 writer.updateDocument(new Term("path", file.toString()), doc);
             }
-
+            cosDoc.close();
         } /* try */
         catch (Exception e)
         {
