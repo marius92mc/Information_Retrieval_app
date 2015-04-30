@@ -3,6 +3,8 @@
 *.xml
 *.iml
 
+*.zip
+
 cerinte
 
 .idea
