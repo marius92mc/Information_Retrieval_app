@@ -21,30 +21,32 @@ import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.*;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.sax.BodyContentHandler;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import java.util.StringTokenizer;
+
+//import org.apache.tika.parser.html.HtmlParser;
 
 /** Index all text files under a directory.
   * <p>
@@ -280,308 +282,74 @@ public class IndexFiles
   /** Indexes a single document */
   static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException
   {
-      try (InputStream stream = Files.newInputStream(file))
-      {
-          //System.out.println("-- " + documentType(file.toString()));
+      try (InputStream stream = Files.newInputStream(file)) {
+          try {
+              Document doc = new Document();
 
-          String fileType = documentType(file.toString()); // application/pdf, text/plain
-          String plainFile = "plain";
-          String pdfFile = "pdf";
-          String docFile = "doc";
+              Field pathField = new StringField("path", file.toString(), Field.Store.YES);
 
+              doc.add(pathField);
+              // Add the last modified date of the file a field named "modified".
+              // Use a LongField that is indexed (i.e. efficiently filterable with
+              // NumericRangeFilter).  This indexes to milli-second resolution, which
+              // is often too fine.  You could instead create a number based on
+              // year/month/day/hour/minutes/seconds, down the resolution you require.
+              // For example the long value 2011021714 would mean
+              // February 17, 2011, 2-3 PM.
+              doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
-          if (fileType.toLowerCase().contains(plainFile.toLowerCase())) // plain text
-          {
-              indexPlaintextFiles(file, writer, stream, lastModified);
-          }
-          else
-          {
-              if (fileType.toLowerCase().contains(pdfFile.toLowerCase())) // pdf
-              {
-                  indexPdfFiles(file, writer, stream, lastModified);
+              doc.add(new TextField("contents", indexTIKA(stream), Field.Store.YES)); // http://oak.cs.ucla.edu/cs144/projects/lucene/ maybe it should ne Field.Store.NO
+              doc.add(new TextField("filename", file.toString(), Field.Store.YES));
+
+              if (docsWithDescription) {
+                  String description = getDescriptionFromFile(fileContent);
+                  TextField descriptionField = new TextField("description",
+                          description,
+                          Field.Store.NO);
+                  descriptionField.setBoost(3);
+                  doc.add(descriptionField);
+              } /* if (docsWithDescription) */
+
+              if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
+                  // New index, so we just add the document (no old document can be there):
+                  System.out.println("adding " + file);
+                  writer.addDocument(doc);
               }
-              else
-              {
-                  if (file.toString().endsWith("doc"))  // doc
-                  {
-                      indexDocFiles(file, writer, stream, lastModified);
-                  }
-                  else
-                  {
-                      if (file.toString().endsWith("docx")) // docx
-                      {
-                          indexDocxFiles(file, writer, stream, lastModified);
-                      }
-                  }
+              else {
+                  // Existing index (an old copy of this document may have been indexed) so
+                  // we use updateDocument instead to replace the old one matching the exact
+                  // path, if present:
+                  System.out.println("updating " + file);
+                  writer.updateDocument(new Term("path", file.toString()), doc);
               }
+          } /* try */
+          catch (Exception e) {
+              System.out.println("error in indexing" + (file.toString()));
           }
       }
   }
 
-    public static void indexPlaintextFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
-        throws FileNotFoundException, CorruptIndexException, IOException
-    {
-        // make a new, empty document
-        Document doc = new Document();
+   public static String indexTIKA(InputStream inStream) throws IOException {
 
-        // Add the path of the file as a field named "path".  Use a
-        // field that is indexed (i.e. searchable), but don't tokenize
-        // the field into separate words and don't index term frequency
-        // or positional information:
-        Field pathField = new StringField("path", file.toString(), Field.Store.YES);
+      ContentHandler handler = new BodyContentHandler();
+      Metadata metadata = new Metadata();
+      AutoDetectParser parser = new AutoDetectParser();
+      ParseContext context = new ParseContext();
+      try {
+          parser.parse(inStream, handler, metadata, context);
+      } catch (SAXException | TikaException e) {
+          System.out.println("Tika autodetect parser error.");
+          e.printStackTrace();
+      }
 
-        doc.add(pathField);
-
-        // Add the last modified date of the file a field named "modified".
-        // Use a LongField that is indexed (i.e. efficiently filterable with
-        // NumericRangeFilter).  This indexes to milli-second resolution, which
-        // is often too fine.  You could instead create a number based on
-        // year/month/day/hour/minutes/seconds, down the resolution you require.
-        // For example the long value 2011021714 would mean
-        // February 17, 2011, 2-3 PM.
-        doc.add(new LongField("modified", lastModified, Field.Store.NO));
-
-        // Add the contents of the file to a field named "contents".  Specify a Reader,
-        // so that the text of the file is tokenized and indexed, but not stored.
-        // Note that FileReader expects the file to be in UTF-8 encoding.
-        // If that's not the case searching for special characters will fail.
-        doc.add(new TextField("contents",
-                              new BufferedReader(new InputStreamReader(stream,
-                                                                       StandardCharsets.UTF_8))));
-        doc.add(new TextField("filename", file.toString(), Field.Store.YES));
-
-        if (docsWithDescription)
-        {
-            String description = getDescriptionFromFile(fileContent);
-            TextField descriptionField = new TextField("description",
-                                                     description,
-                                                     Field.Store.NO);
-            descriptionField.setBoost(3);
-            doc.add(descriptionField);
-        } /* if (docsWithDescription) */
-
-        if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-            // New index, so we just add the document (no old document can be there):
-            System.out.println("adding " + file);
-            writer.addDocument(doc);
-        } else {
-            // Existing index (an old copy of this document may have been indexed) so
-            // we use updateDocument instead to replace the old one matching the exact
-            // path, if present:
-            System.out.println("updating " + file);
-            writer.updateDocument(new Term("path", file.toString()), doc);
-        }
+      return handler.toString();
     }
 
-
-    public static void indexPdfFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
-            throws FileNotFoundException, CorruptIndexException, IOException
-    {
-        fileContent = null;
-        PDFParser pdfparser = null;
-        try
-        {
-            Document doc = new Document();
-            /*
-            if (file.getName().endsWith(".doc")) {
-
-                //call the doc file parser and get the content of doc file in txt format
-                //fileContent = new DocFileParser().DocFileContentParser(file.getAbsolutePath());
-            }
-            if (file.getName().endsWith(".pdf")) {
-                //call the pdf file parser and get the content of pdf file in txt format
-                pdfparser = new PDFParser(stream);
-            }*/
-            pdfparser = new PDFParser(stream);
-            pdfparser.parse();
-            COSDocument cosDoc = pdfparser.getDocument();
-
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-            PDDocument pdDoc = new PDDocument(cosDoc);
-
-            pdfStripper.setStartPage(1);
-            pdfStripper.setEndPage(pdDoc.getNumberOfPages());
-
-            fileContent = pdfStripper.getText(pdDoc);
-
-            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
-
-            doc.add(pathField);
-            // Add the last modified date of the file a field named "modified".
-            // Use a LongField that is indexed (i.e. efficiently filterable with
-            // NumericRangeFilter).  This indexes to milli-second resolution, which
-            // is often too fine.  You could instead create a number based on
-            // year/month/day/hour/minutes/seconds, down the resolution you require.
-            // For example the long value 2011021714 would mean
-            // February 17, 2011, 2-3 PM.
-            doc.add(new LongField("modified", lastModified, Field.Store.NO));
-
-            doc.add(new TextField("contents", fileContent, Field.Store.YES)); // http://oak.cs.ucla.edu/cs144/projects/lucene/ maybe it should ne Field.Store.NO
-            doc.add(new TextField("filename", file.toString(), Field.Store.YES));
-
-            if (docsWithDescription)
-            {
-                String description = getDescriptionFromFile(fileContent);
-                TextField descriptionField = new TextField("description",
-                                                         description,
-                                                         Field.Store.NO);
-                descriptionField.setBoost(3);
-                doc.add(descriptionField);
-            } /* if (docsWithDescription) */
-
-            if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
-            {
-                // New index, so we just add the document (no old document can be there):
-                System.out.println("adding " + file);
-                writer.addDocument(doc);
-            }
-            else
-            {
-                // Existing index (an old copy of this document may have been indexed) so
-                // we use updateDocument instead to replace the old one matching the exact
-                // path, if present:
-                System.out.println("updating " + file);
-                writer.updateDocument(new Term("path", file.toString()), doc);
-            }
-            cosDoc.close();
-        } /* try */
-        catch (Exception e)
-        {
-            System.out.println("error in indexing" + (file.toString()));
-        }
-    }
-
-    public static void indexDocFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
-            throws FileNotFoundException, CorruptIndexException, IOException
-    {
-        fileContent = null;
-
-        try
-        {
-
-            Document doc = new Document();
-            HWPFDocument docFile = new HWPFDocument(stream);
-
-            StringBuilder documentContent = docFile.getText();
-            //System.out.println(documentContent.toString());
-            fileContent = documentContent.toString();
-
-            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
-
-            doc.add(pathField);
-            // Add the last modified date of the file a field named "modified".
-            // Use a LongField that is indexed (i.e. efficiently filterable with
-            // NumericRangeFilter).  This indexes to milli-second resolution, which
-            // is often too fine.  You could instead create a number based on
-            // year/month/day/hour/minutes/seconds, down the resolution you require.
-            // For example the long value 2011021714 would mean
-            // February 17, 2011, 2-3 PM.
-            doc.add(new LongField("modified", lastModified, Field.Store.NO));
-
-            doc.add(new TextField("contents", fileContent, Field.Store.YES));
-            doc.add(new TextField("filename", file.toString(), Field.Store.YES));
-
-            if (docsWithDescription)
-            {
-                String description = getDescriptionFromFile(fileContent);
-                TextField descriptionField = new TextField("description",
-                                                         description,
-                                                         Field.Store.NO);
-                descriptionField.setBoost(3);
-                doc.add(descriptionField);
-            } /* if (docsWithDescription) */
-
-            if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
-            {
-                // New index, so we just add the document (no old document can be there):
-                System.out.println("adding " + file);
-                writer.addDocument(doc);
-            }
-            else
-            {
-                // Existing index (an old copy of this document may have been indexed) so
-                // we use updateDocument instead to replace the old one matching the exact
-                // path, if present:
-                System.out.println("updating " + file);
-                writer.updateDocument(new Term("path", file.toString()), doc);
-            }
-
-        } /* try */
-        catch (Exception e)
-        {
-            System.out.println("error in indexing" + (file.toString()));
-        }
-    }
-    
-    public static void indexDocxFiles(Path file, IndexWriter writer, InputStream stream, long lastModified)
-            throws FileNotFoundException, CorruptIndexException, IOException
-    {
-        fileContent = null;
-
-        try
-        {
-
-            Document doc = new Document();
-            XWPFDocument docxFile = new XWPFDocument(stream);
-        
-            XWPFWordExtractor extractor = new XWPFWordExtractor(docxFile);
-            
-            fileContent = extractor.getText();
-			
-            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
-
-            doc.add(pathField);
-            // Add the last modified date of the file a field named "modified".
-            // Use a LongField that is indexed (i.e. efficiently filterable with
-            // NumericRangeFilter).  This indexes to milli-second resolution, which
-            // is often too fine.  You could instead create a number based on
-            // year/month/day/hour/minutes/seconds, down the resolution you require.
-            // For example the long value 2011021714 would mean
-            // February 17, 2011, 2-3 PM.
-            doc.add(new LongField("modified", lastModified, Field.Store.NO));
-
-            doc.add(new TextField("contents", fileContent, Field.Store.YES));
-            doc.add(new TextField("filename", file.toString(), Field.Store.YES));
-
-            if (docsWithDescription)
-            {
-                String description = getDescriptionFromFile(fileContent);
-                TextField descriptionField = new TextField("description",
-                                                         description,
-                                                         Field.Store.NO);
-                descriptionField.setBoost(3);
-                doc.add(descriptionField);
-            } /* if (docsWithDescription) */
-
-            if (writer.getConfig().getOpenMode() == OpenMode.CREATE)
-            {
-                // New index, so we just add the document (no old document can be there):
-                System.out.println("adding " + file);
-                writer.addDocument(doc);
-            }
-            else
-            {
-                // Existing index (an old copy of this document may have been indexed) so
-                // we use updateDocument instead to replace the old one matching the exact
-                // path, if present:
-                System.out.println("updating " + file);
-                writer.updateDocument(new Term("path", file.toString()), doc);
-            }
-
-        } /* try */
-        catch (Exception e)
-        {
-            System.out.println("error in indexing" + (file.toString()));
-        }
-    }
-
-    public static String getDescriptionFromFile(String fileContent)
-    {
+    public static String getDescriptionFromFile(String fileContent) {
         StringTokenizer st = new StringTokenizer(fileContent);
         StringBuilder description = new StringBuilder();
 
-        for (int i = 0; i < nrOfWordsInDescription && st.hasMoreTokens(); i++)
-        {
+        for (int i = 0; i < nrOfWordsInDescription && st.hasMoreTokens(); i++) {
             description.append(st.nextToken().toString());
             description.append(" ");
         }
